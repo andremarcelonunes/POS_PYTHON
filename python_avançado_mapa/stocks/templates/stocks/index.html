@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Top 10 Ações Mais Rentáveis</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .loading-message {
+            display: none;
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="mt-5">Top 10 Ações Mais Rentáveis dos Últimos Meses</h1>
+        <form id="data-form" class="mb-5">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="months">Selecione a quantidade de meses:</label>
+                <select id="months" name="months" class="form-control" style="width: 20%;">
+                    {% for i in months_range %}
+                        <option value="{{ i }}" {% if i == months %}selected{% endif %}>{{ i }} Meses</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Atualizar</button>
+        </form>
+        <div id="loading" class="loading-message">Consultando Bases, aguarde o seu relatório...</div>
+        <div id="graph-container">
+            {{ graph_html | safe }}
+        </div>
+        <div id="table-container">
+             {{ table_html | safe }}
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#data-form').on('submit', function(event) {
+                event.preventDefault(); // Impede o envio normal do formulário
+                $('#loading').show(); // Mostra a mensagem de carregamento
+                $.ajax({
+                    url: '',
+                    type: 'POST',
+                    data: $(this).serialize(),
+                    success: function(data) {
+                         $('#loading').hide(); // Esconde a mensagem de carregamento
+                        $('#graph-container').html(data.split('<table')[0]); // Atualiza o gráfico
+                        $('#table-container').html('<table' + data.split('<table')[1]); // Atualiza a tabela
+                        },
+                    error: function(xhr, status, error) {
+                        $('#loading').hide(); // Esconde a mensagem de carregamento
+                        alert('Ocorreu um erro ao consultar os dados: ' + error);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
